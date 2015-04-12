@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+#Landru, David Ferrone, Jan 25 2015
+# # # # # # # # # # # # # # # # # #
+
+my $ChoresFolder=".";
+
+$a = `perl $ChoresFolder/Landru_Quote.pl > $ChoresFolder/Landru_Commands.txt`;
+$b = `perl $ChoresFolder/mailer.pl`;
+print "Done.\n";

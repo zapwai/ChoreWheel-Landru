@@ -20,9 +20,9 @@ sub Chore_Selector{
 
 sub main{
     $Selected_Chores=&Chore_Selector;
-    print "The chores I have selected for David are: ", $Selected_Chores;
+    print "The chores I have selected for Person One are: ", $Selected_Chores;
     print "\n";
-    print "The chores I have selected for Taneisha : ";
+    print "The chores I have selected for Person Two are: ";
     foreach(@Local_List){
 	print $_.", ";}
     print "\n\n";
