@@ -5,20 +5,24 @@
 # We first produce the text file Landru_Commands.txt (for no real reason). Then mail that text out, along with a snazzy jpeg.
 use Email::Sender::Transport::SMTP qw();
 use Email::Stuffer;
-
+use Email::Send::SMTP::Gmail;
 ######### Edit These ########################
+my $Gmail_Option=1;		  # mark as 0 to NOT use gmail
 my $Name_One="Person One";
 my $Name_Two="Person Two";
 my $Receivers='receiver1@gmail.com, receiver2@gmail.com';
 my $Sender='Username@gmail.com';
 my $Passwd='password';
-my $SMTP_Address='smtp.gmail.com';
-my $PORT_Num='587';
+# SMTP and port are actually hard-coded if gmail_option is on.
+# Edit these next two lines if you have a different mail server.
+my $SMTP_Address='smtp.gmail.com'; 
+my $PORT_Num='465'; # e.g. gmail ssl port
 my @Chore_List=("Kitchen", "Bathroom", "Living room", "Dining room","Bedroom","Laundry");
 my $output_filename = "Landru_Commands.txt";
 my $image_filename = "LandruProjection.jpg";
 my $subject = "... Chores ...";
 #############################################
+########## No Need to Change Code Below #####
 ## (Formerly chores.pl)
 my @Local_List = @Chore_List;
 sub Chore_Selector{
@@ -45,8 +49,6 @@ sub Chores {
 }
 ############################################################
 ## Formerly mailer.pl
-# Enter the email address, and password that you will send from.
-# Enter from and to fields. Check smtp and port.
 sub SendIt{
     # Doesn't like no msg! We will read from a text file.
     open (my $FH, "<", $output_filename);
@@ -67,6 +69,27 @@ sub SendIt{
 	  ->transport($transport)
 	  ->send;    
 }
+sub Gmail_SendIt {
+    open (my $FH, "<", $output_filename);
+    my @MSG = <$FH>;
+    close $FH;
+
+    my $mail=Email::Send::SMTP::Gmail->new( -smtp=>'smtp.gmail.com',
+					    -layer=> 'ssl',
+					    -port=>465,
+					    -login=>$Sender,
+					    -pass=>$Passwd
+					);
+
+    $mail->send(-to=>$Receivers,
+		-subject=>$subject,
+		-verbose=>'1',
+		-body=>"@MSG",
+		-attachments=>$image_filename,
+	    );
+
+    $mail->bye;
+}
 ############################################################
 ## Formerly Landru_Quote.pl
 sub PrintIt{
@@ -84,4 +107,9 @@ sub PrintIt{
 }
 
 PrintIt();
-SendIt();
+
+if ($Gmail_Option) {
+    Gmail_SendIt();
+} elsif (!$Gmail_Option) {
+    SendIt();
+}

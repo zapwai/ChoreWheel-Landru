@@ -6,5 +6,6 @@ This randomly splits a list of chores in two, and emails you from "Landru," the 
 ---
 
 Uses perl, Email::Sender, and Email::Stuffer.
+For sending via gmail, makes use of Email::Send::SMTP::Gmail.
 
 (My initial goal was to simply type 'Landru' in the terminal to email us our weekly chores.)
