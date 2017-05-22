@@ -1,9 +1,87 @@
 #!/usr/bin/perl
 #Landru, David Ferrone, Jan 25 2015
+#Update May 2017. One file, new library, attach one image.
 # # # # # # # # # # # # # # # # # #
+# We first produce the text file Landru_Commands.txt (for no real reason). Then mail that text out, along with a snazzy jpeg.
+use Email::Sender::Transport::SMTP qw();
+use Email::Stuffer;
 
-my $ChoresFolder=".";
+######### Edit These ########################
+my $Name_One="Person One";
+my $Name_Two="Person Two";
+my $Receivers='receiver1@gmail.com, receiver2@gmail.com';
+my $Sender='Username@gmail.com';
+my $Passwd='password';
+my $SMTP_Address='smtp.gmail.com';
+my $PORT_Num='587';
+my @Chore_List=("Kitchen", "Bathroom", "Living room", "Dining room","Bedroom","Laundry");
+my $output_filename = "Landru_Commands.txt";
+my $image_filename = "LandruProjection.jpg";
+my $subject = "... Chores ...";
+#############################################
+## (Formerly chores.pl)
+my @Local_List = @Chore_List;
+sub Chore_Selector{
+    my $Half_Length = int($#Local_List/2);
+    my $Chores="";
+    for (my $i=0; $i <= $Half_Length; $i++) {
+	my $Length = $#Local_List;
+	my $r = rand($Length);
+	$Chores=$Chores.$Local_List[$r].", ";
+	splice @Local_List, $r, 1;
+    }
+    return $Chores;
+}
+sub Chores {
+    my $Selected_Chores = Chore_Selector();
+    my $OUTPUT;
+    $OUTPUT .= "The chores I have selected for $Name_One are: ".$Selected_Chores."\n\n";
+    $OUTPUT .= "The chores I have selected for $Name_Two are: ";
+    foreach (@Local_List) {
+	$OUTPUT .= $_.", ";
+    }
+    $OUTPUT .= "\n\n";
+    return $OUTPUT;
+}
+############################################################
+## Formerly mailer.pl
+# Enter the email address, and password that you will send from.
+# Enter from and to fields. Check smtp and port.
+sub SendIt{
+    # Doesn't like no msg! We will read from a text file.
+    open (my $FH, "<", $output_filename);
+    my @MSG = <$FH>;
+    close $FH;
+    my $transport = Email::Sender::Transport::SMTP->new({
+	host => $SMTP_Address,
+	port => $PORT_Num,
+	sasl_username => $Sender,
+	sasl_password => $Passwd,
+    });
 
-$a = `perl $ChoresFolder/Landru_Quote.pl > $ChoresFolder/Landru_Commands.txt`;
-$b = `perl $ChoresFolder/mailer.pl`;
-print "Done.\n";
+    Email::Stuffer->to( $Receivers )
+	  ->from($Sender)
+	  ->subject($subject)
+	  ->text_body("@MSG")
+	  ->attach_file($image_filename)
+	  ->transport($transport)
+	  ->send;    
+}
+############################################################
+## Formerly Landru_Quote.pl
+sub PrintIt{
+    if (-e $output_filename) {
+	unlink $output_filename;
+    }
+    open (my $FH, ">>", $output_filename);
+    my $a_result = Chores();    
+    print $FH "Hark! THIS IS THE WORD OF LANDRU...\nYou are compelled to obey.\n\n";
+    print $FH $a_result;
+    print $FH "If these chores are not completed within one week...\n\t the offender will be absorbed.\n";
+    print $FH "\t\t\t For the good of the body and all that. \n\n\t\t\t\t ta ta for now, Landru\n";
+    print $FH "\n -- \n";
+    print $FH "Landru seeks tranquility. Peace for all. The universal good.\n";
+}
+
+PrintIt();
+SendIt();

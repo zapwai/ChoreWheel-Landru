@@ -5,9 +5,6 @@ This randomly splits a list of chores in two, and emails you from "Landru," the 
 
 ---
 
-Uses perl and the Mail::Sender library, available in CPAN.
-
-The .pl files are used by the main executable Landru.
-After editing the chore-list in chores.pl and the email address info in mailer.pl, simply run the perl script Landru.
+Uses perl, Email::Sender, and Email::Stuffer.
 
 (My initial goal was to simply type 'Landru' in the terminal to email us our weekly chores.)
